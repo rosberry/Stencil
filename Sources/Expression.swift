@@ -56,7 +56,7 @@ final class VariableExpression: Expression, CustomStringConvertible {
       truthy = !result.isEmpty
     } else if let value = result, let result = toNumber(value: value) {
       truthy = result > 0
-    } else if result != nil {
+    } else if String(describing: result) != "Optional(nil)" {
       truthy = true
     }
 
@@ -85,37 +85,6 @@ final class NotExpression: Expression, PrefixOperator, CustomStringConvertible {
   }
 }
 
-final class InExpression: Expression, InfixOperator, CustomStringConvertible {
-  let lhs: Expression
-  let rhs: Expression
-  
-  init(lhs: Expression, rhs: Expression) {
-    self.lhs = lhs
-    self.rhs = rhs
-  }
-  
-  var description: String {
-    return "(\(lhs) in \(rhs))"
-  }
-  
-  func evaluate(context: Context) throws -> Bool {
-    if let lhs = lhs as? VariableExpression, let rhs = rhs as? VariableExpression {
-      let lhsValue = try lhs.variable.resolve(context)
-      let rhsValue = try rhs.variable.resolve(context)
-      
-      if let lhs = lhsValue as? AnyHashable, let rhs = rhsValue as? [AnyHashable] {
-        return rhs.contains(lhs)
-      } else if let lhs = lhsValue as? String, let rhs = rhsValue as? String {
-        return rhs.contains(lhs)
-      } else if lhsValue == nil && rhsValue == nil {
-        return true
-      }
-    }
-    
-    return false
-  }
-  
-}
 
 final class OrExpression: Expression, InfixOperator, CustomStringConvertible {
   let lhs: Expression
