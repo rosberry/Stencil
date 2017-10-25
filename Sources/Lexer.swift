@@ -50,6 +50,12 @@ struct Lexer {
 
     let scanner = Scanner(templateString)
 
+    let lexicalKeys: [String] = [
+        .variableStartLexeme,
+        .blockNoBRStartLexeme,
+        .blockStartLexeme,
+        .commentStartLexeme
+    ]
     let lexicalMap: [String: String] = [
       .variableStartLexeme: .variableEndLexeme,
       .blockStartLexeme: .blockEndLexeme,
@@ -58,7 +64,7 @@ struct Lexer {
     ]
 
     while !scanner.isEmpty {
-      if let text = scanner.scan(until: Array(lexicalMap.keys)) {
+      if let text = scanner.scan(until: lexicalKeys) {
         if !text.1.isEmpty {
           tokens.append(createToken(string: text.1))
         }
