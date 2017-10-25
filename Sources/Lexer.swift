@@ -1,3 +1,5 @@
+import Foundation
+
 extension String {
     static let variableStartLexeme = "{{"
     static let variableEndLexeme = "}}"
@@ -10,6 +12,18 @@ extension String {
 
     static let commentStartLexeme = "{#"
     static let commentEndLexeme = "#}"
+
+    func trimmingTrailingWhitespaces() -> String {
+        let reversedCharacters = characters.reversed()
+        var endIndex = reversedCharacters.count
+        for character in reversedCharacters {
+            if CharacterSet(charactersIn: String(character)).isSubset(of: .whitespaces) == false {
+                break
+            }
+            endIndex -= 1
+        }
+        return String(self[..<index(startIndex, offsetBy: endIndex)])
+    }
 }
 
 struct Lexer {
@@ -66,7 +80,11 @@ struct Lexer {
     while !scanner.isEmpty {
       if let text = scanner.scan(until: lexicalKeys) {
         if !text.1.isEmpty {
-          tokens.append(createToken(string: text.1))
+          var processedText = text.1
+          if text.0 == .blockNoBRStartLexeme {
+            processedText = processedText.trimmingTrailingWhitespaces()
+          }
+          tokens.append(createToken(string: processedText))
         }
 
         let end = lexicalMap[text.0]!
