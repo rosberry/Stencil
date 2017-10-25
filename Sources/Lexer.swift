@@ -1,3 +1,17 @@
+extension String {
+    static let variableStartLexeme = "{{"
+    static let variableEndLexeme = "}}"
+
+    static let blockStartLexeme = "{%"
+    static let blockEndLexeme = "%}"
+
+    static let blockNoBRStartLexeme = "{%-"
+    static let blockNoBREndLexeme = "-%}\n"
+
+    static let commentStartLexeme = "{#"
+    static let commentEndLexeme = "#}"
+}
+
 struct Lexer {
   let templateString: String
 
@@ -5,20 +19,26 @@ struct Lexer {
     self.templateString = templateString
   }
 
-  func createToken(string: String) -> Token {
-    func strip() -> String {
-      guard string.characters.count > 4 else { return "" }
-      let start = string.index(string.startIndex, offsetBy: 2)
-      let end = string.index(string.endIndex, offsetBy: -2)
+  struct LexemePair {
+    var start: String
+    var end: String
+  }
+
+  func createToken(string:String) -> Token {
+    func strip(pair: LexemePair) -> String {
+      let start = string.index(string.startIndex, offsetBy: pair.start.characters.count)
+      let end = string.index(string.endIndex, offsetBy: -pair.end.characters.count)
       return string[start..<end].trim(character: " ")
     }
 
-    if string.hasPrefix("{{") {
-      return .variable(value: strip())
-    } else if string.hasPrefix("{%") {
-      return .block(value: strip())
-    } else if string.hasPrefix("{#") {
-      return .comment(value: strip())
+    if string.hasPrefix(.variableStartLexeme) {
+      return .variable(value: strip(pair: LexemePair(start: .variableStartLexeme, end: .variableEndLexeme)))
+    } else if string.hasPrefix(.blockNoBRStartLexeme) {
+      return .block(value: strip(pair: LexemePair(start: .blockNoBRStartLexeme, end: .blockNoBREndLexeme)))
+    } else if string.hasPrefix(.blockStartLexeme) {
+      return .block(value: strip(pair: LexemePair(start: .blockStartLexeme, end: .blockEndLexeme)))
+    } else if string.hasPrefix(.commentStartLexeme) {
+      return .comment(value: strip(pair: LexemePair(start: .commentStartLexeme, end: .commentEndLexeme)))
     }
 
     return .text(value: string)
@@ -30,19 +50,20 @@ struct Lexer {
 
     let scanner = Scanner(templateString)
 
-    let map = [
-      "{{": "}}",
-      "{%": "%}",
-      "{#": "#}",
+    let lexicalMap: [String: String] = [
+      .variableStartLexeme: .variableEndLexeme,
+      .blockStartLexeme: .blockEndLexeme,
+      .blockNoBRStartLexeme: .blockNoBREndLexeme,
+      .commentStartLexeme: .commentEndLexeme
     ]
 
     while !scanner.isEmpty {
-      if let text = scanner.scan(until: ["{{", "{%", "{#"]) {
+      if let text = scanner.scan(until: Array(lexicalMap.keys)) {
         if !text.1.isEmpty {
           tokens.append(createToken(string: text.1))
         }
 
-        let end = map[text.0]!
+        let end = lexicalMap[text.0]!
         let result = scanner.scan(until: end, returnUntil: true)
         tokens.append(createToken(string: result))
       } else {
@@ -91,7 +112,6 @@ class Scanner {
       index = content.index(after: index)
     }
 
-    content = ""
     return ""
   }
 
