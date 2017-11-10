@@ -1,8 +1,6 @@
 import Foundation
 
-
 typealias Number = Float
-
 
 class FilterExpression : Resolvable {
   let filters: [(FilterType, [Variable])]
@@ -104,7 +102,11 @@ public struct Variable : Equatable, Resolvable {
         current = mirror.descendant(bit)
 
         if current == nil {
-          return nil
+            let objectMirror = Mirror(reflecting: value as AnyObject) // hack for chaining calls to optional instances
+            current = objectMirror.descendant(bit)
+            if current == nil {
+                return nil
+            }
           // mirror returns non-nil value even for nil-containing properties
           // so we have to check if its value is actually nil or not
         } else if let current = current, String(describing: current) == "nil" {
