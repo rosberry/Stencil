@@ -14,7 +14,7 @@ extension String {
     static let commentEndLexeme = "#}"
 
     func trimmingTrailingWhitespaces() -> String {
-        let reversedCharacters = characters.reversed()
+        let reversedCharacters = reversed()
         var endIndex = reversedCharacters.count
         for character in reversedCharacters {
             if CharacterSet(charactersIn: String(character)).isSubset(of: .whitespaces) == false {
@@ -40,8 +40,8 @@ struct Lexer {
 
   func createToken(string:String) -> Token {
     func strip(pair: LexemePair) -> String {
-      let start = string.index(string.startIndex, offsetBy: pair.start.characters.count)
-      let end = string.index(string.endIndex, offsetBy: -pair.end.characters.count)
+      let start = string.index(string.startIndex, offsetBy: pair.start.count)
+      let end = string.index(string.endIndex, offsetBy: -pair.end.count)
         if start >= end {
             return ""
         }
