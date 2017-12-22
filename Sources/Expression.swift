@@ -348,7 +348,7 @@ class StartsWithExpression: Expression, InfixOperator, CustomStringConvertible {
             let rhsValue = try rhs.variable.resolve(context)
 
             if let lhs = lhsValue, let rhs = rhsValue {
-               return "\(lhs)".starts(with: "\(rhs)")
+               return "\(lhs as AnyObject)".starts(with: "\(rhs as AnyObject)")
             } else if lhsValue == nil && rhsValue == nil {
                 return true
             }
@@ -377,7 +377,7 @@ class EndsWithExpression: Expression, InfixOperator, CustomStringConvertible {
             let rhsValue = try rhs.variable.resolve(context)
 
             if let lhs = lhsValue, let rhs = rhsValue {
-                return "\(lhs)".hasSuffix("\(rhs)")
+                return "\(lhs as AnyObject)".hasSuffix("\(rhs as AnyObject)")
             } else if lhsValue == nil && rhsValue == nil {
                 return true
             }
