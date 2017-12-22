@@ -295,6 +295,30 @@ func testExpressions() {
           try expect(expression.evaluate(context: Context(dictionary: ["lhs": "a", "rhs": "bcd"]))).to.beFalse()
         }
       }
+
+      $0.describe("starts with expession") {
+        let expression = try! parseExpression(components: ["lhs", "^=", "rhs"], tokenParser: parser)
+
+        $0.it("evaluates to true when lhs starts with rhs") {
+          try expect(expression.evaluate(context: Context(dictionary: ["lhs": "hello world", "rhs": "hello"]))).to.beTrue()
+        }
+
+        $0.it("evaluates to false when lhs doesn't start with rhs") {
+          try expect(expression.evaluate(context: Context(dictionary: ["lhs": "hello world", "rhs": "world"]))).to.beFalse()
+        }
+      }
+
+      $0.describe("ends with expession") {
+        let expression = try! parseExpression(components: ["lhs", "$=", "rhs"], tokenParser: parser)
+
+        $0.it("evaluates to true when lhs ends with rhs") {
+          try expect(expression.evaluate(context: Context(dictionary: ["lhs": "hello world", "rhs": "world"]))).to.beTrue()
+        }
+
+        $0.it("evaluates to false when lhs doesn't end with rhs") {
+          try expect(expression.evaluate(context: Context(dictionary: ["lhs": "hello world", "rhs": "hello"]))).to.beFalse()
+        }
+      }
     }
   }
 }

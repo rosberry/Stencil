@@ -24,6 +24,8 @@ let operators: [Operator] = [
   .infix(">=", 10, MoreThanEqualExpression.self),
   .infix("<", 10, LessThanExpression.self),
   .infix("<=", 10, LessThanEqualExpression.self),
+  .infix("^=", 10, StartsWithExpression.self),
+  .infix("$=", 10, EndsWithExpression.self),
 ]
 
 

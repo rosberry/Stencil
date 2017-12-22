@@ -328,3 +328,61 @@ func toNumber(value: Any) -> Number? {
 
     return nil
 }
+
+class StartsWithExpression: Expression, InfixOperator, CustomStringConvertible {
+    let lhs: Expression
+    let rhs: Expression
+
+    required init(lhs: Expression, rhs: Expression) {
+        self.lhs = lhs
+        self.rhs = rhs
+    }
+
+    var description: String {
+        return "(\(lhs) ^= \(rhs))"
+    }
+
+    func evaluate(context: Context) throws -> Bool {
+        if let lhs = lhs as? VariableExpression, let rhs = rhs as? VariableExpression {
+            let lhsValue = try lhs.variable.resolve(context)
+            let rhsValue = try rhs.variable.resolve(context)
+
+            if let lhs = lhsValue, let rhs = rhsValue {
+               return "\(lhs)".starts(with: "\(rhs)")
+            } else if lhsValue == nil && rhsValue == nil {
+                return true
+            }
+        }
+
+        return false
+    }
+}
+
+class EndsWithExpression: Expression, InfixOperator, CustomStringConvertible {
+    let lhs: Expression
+    let rhs: Expression
+
+    required init(lhs: Expression, rhs: Expression) {
+        self.lhs = lhs
+        self.rhs = rhs
+    }
+
+    var description: String {
+        return "(\(lhs) $= \(rhs))"
+    }
+
+    func evaluate(context: Context) throws -> Bool {
+        if let lhs = lhs as? VariableExpression, let rhs = rhs as? VariableExpression {
+            let lhsValue = try lhs.variable.resolve(context)
+            let rhsValue = try rhs.variable.resolve(context)
+
+            if let lhs = lhsValue, let rhs = rhsValue {
+                return "\(lhs)".hasSuffix("\(rhs)")
+            } else if lhsValue == nil && rhsValue == nil {
+                return true
+            }
+        }
+
+        return false
+    }
+}

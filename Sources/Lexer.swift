@@ -42,6 +42,10 @@ struct Lexer {
     func strip(pair: LexemePair) -> String {
       let start = string.index(string.startIndex, offsetBy: pair.start.characters.count)
       let end = string.index(string.endIndex, offsetBy: -pair.end.characters.count)
+        if start >= end {
+            return ""
+        }
+
       return string[start..<end].trim(character: " ")
     }
 
@@ -136,6 +140,7 @@ class Scanner {
       index = content.index(after: index)
     }
 
+    content = ""
     return ""
   }
 
