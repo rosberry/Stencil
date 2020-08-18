@@ -14,9 +14,19 @@ open class Extension {
 
   /// Registers a simple template tag with a name and a handler
   public func registerSimpleTag(_ name: String, handler: @escaping (Context) throws -> String) {
-    registerTag(name, parser: { parser, token in
-      return SimpleNode(handler: handler)
-    })
+    registerTag(name) { _, token in
+      SimpleNode(token: token, handler: handler)
+    }
+  }
+
+  /// Registers boolean filter with it's negative counterpart
+  // swiftlint:disable:next discouraged_optional_boolean
+  public func registerFilter(name: String, negativeFilterName: String, filter: @escaping (Any?) throws -> Bool?) {
+    filters[name] = .simple(filter)
+    filters[negativeFilterName] = .simple {
+      guard let result = try filter($0) else { return nil }
+      return !result
+    }
   }
 
   /// Registers a template filter with the given name
@@ -26,10 +36,14 @@ open class Extension {
 
   /// Registers a template filter with the given name
   public func registerFilter(_ name: String, filter: @escaping (Any?, [Any?]) throws -> Any?) {
+    filters[name] = .arguments({ value, args, _ in try filter(value, args) })
+  }
+
+  /// Registers a template filter with the given name
+  public func registerFilter(_ name: String, filter: @escaping (Any?, [Any?], Context) throws -> Any?) {
     filters[name] = .arguments(filter)
   }
 }
-
 
 class DefaultExtension: Extension {
   override init() {
@@ -42,9 +56,9 @@ class DefaultExtension: Extension {
     registerTag("for", parser: ForNode.parse)
     registerTag("if", parser: IfNode.parse)
     registerTag("ifnot", parser: IfNode.parse_ifnot)
-#if !os(Linux)
-    registerTag("now", parser: NowNode.parse)
-#endif
+    #if !os(Linux)
+      registerTag("now", parser: NowNode.parse)
+    #endif
     registerTag("include", parser: IncludeNode.parse)
     registerTag("extends", parser: ExtendsNode.parse)
     registerTag("block", parser: BlockNode.parse)
@@ -57,28 +71,29 @@ class DefaultExtension: Extension {
     registerFilter("uppercase", filter: uppercase)
     registerFilter("lowercase", filter: lowercase)
     registerFilter("join", filter: joinFilter)
+    registerFilter("split", filter: splitFilter)
+    registerFilter("indent", filter: indentFilter)
+    registerFilter("filter", filter: filterFilter)
   }
 }
 
-
 protocol FilterType {
-  func invoke(value: Any?, arguments: [Any?]) throws -> Any?
+  func invoke(value: Any?, arguments: [Any?], context: Context) throws -> Any?
 }
 
 enum Filter: FilterType {
   case simple(((Any?) throws -> Any?))
-  case arguments(((Any?, [Any?]) throws -> Any?))
+  case arguments(((Any?, [Any?], Context) throws -> Any?))
 
-  func invoke(value: Any?, arguments: [Any?]) throws -> Any? {
+  func invoke(value: Any?, arguments: [Any?], context: Context) throws -> Any? {
     switch self {
     case let .simple(filter):
       if !arguments.isEmpty {
-        throw TemplateSyntaxError("cannot invoke filter with an argument")
+        throw TemplateSyntaxError("Can't invoke filter with an argument")
       }
-
       return try filter(value)
     case let .arguments(filter):
-      return try filter(value, arguments)
+      return try filter(value, arguments, context)
     }
   }
 }
