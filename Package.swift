@@ -1,4 +1,4 @@
-// swift-tools-version:4.2
+// swift-tools-version:5.2
 import PackageDescription
 
 let package = Package(
@@ -18,6 +18,5 @@ let package = Package(
       "Stencil",
       "Spectre"
     ])
-  ],
-  swiftLanguageVersions: [.v4_2]
+  ]
 )
