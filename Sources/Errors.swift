@@ -55,6 +55,7 @@ public protocol ErrorReporter: AnyObject {
 }
 
 open class SimpleErrorReporter: ErrorReporter {
+
   open func renderError(_ error: Error) -> String {
     guard let templateError = error as? TemplateSyntaxError else { return error.localizedDescription }
 
@@ -73,9 +74,10 @@ open class SimpleErrorReporter: ErrorReporter {
         """
     }
 
-	var descriptions = templateError.stackTrace.reduce(into: []) { $0.append(describe(token: $1)) }
+    var descriptions = templateError.stackTrace.reduce([]) { $0 + [describe(token: $1)] }
     let description = templateError.token.map(describe(token:)) ?? templateError.reason
     descriptions.append(description)
     return descriptions.joined(separator: "\n")
   }
+
 }

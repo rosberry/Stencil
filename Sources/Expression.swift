@@ -113,6 +113,7 @@ final class InExpression: Expression, InfixOperator, CustomStringConvertible {
 
     return false
   }
+
 }
 
 final class OrExpression: Expression, InfixOperator, CustomStringConvertible {

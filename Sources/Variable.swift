@@ -189,6 +189,7 @@ public struct RangeVariable: Resolvable {
     let range = min(lower, upper)...max(lower, upper)
     return lower > upper ? Array(range.reversed()) : Array(range)
   }
+
 }
 
 func normalize(_ current: Any?) -> Any? {
