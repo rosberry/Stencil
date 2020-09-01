@@ -150,6 +150,30 @@ final class FilterTests: XCTestCase {
       let result = try template.render(Context(dictionary: ["name": "Kyle"]))
       try expect(result) == "kyle"
     }
+
+    it("transforms a string to be upper camelcase") {
+      let template = Template(templateString: "{{ name|upperCamelcase }}")
+      let result = try template.render(Context(dictionary: ["name": "kyle_riz"]))
+      try expect(result) == "KyleRiz"
+    }
+
+    it("transforms a string to be lower camelcase") {
+      let template = Template(templateString: "{{ name|lowerCamelcase }}")
+      let result = try template.render(Context(dictionary: ["name": "Kyle_Riz"]))
+      try expect(result) == "kyleRiz"
+    }
+
+    it("transforms a string to be camelcase") {
+      let template = Template(templateString: "{{ name|camelcase }}")
+      let result = try template.render(Context(dictionary: ["name": "kyle_riz"]))
+      try expect(result) == "kyleRiz"
+    }
+
+    it("transforms a string to be the same camelcase") {
+      let template = Template(templateString: "{{ name|camelcase }}")
+      let result = try template.render(Context(dictionary: ["name": "KyleRiz"]))
+      try expect(result) == "KyleRiz"
+    }
   }
 
   func testStringFiltersWithArrays() {
